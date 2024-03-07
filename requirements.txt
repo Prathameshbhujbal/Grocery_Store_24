@@ -1,0 +1,17 @@
+aniso8601
+blinker
+click
+Flask
+Flask-RESTful
+Flask-SQLAlchemy
+importlib-metadata
+itsdangerous
+Jinja2
+MarkupSafe
+python-dotenv
+pytz
+six
+SQLAlchemy
+typing_extensions
+Werkzeug
+zipp
