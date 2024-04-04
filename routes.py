@@ -84,6 +84,22 @@ def auth_required(func):
     return inner
 
 
+def admin_required(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if not "user_id" in session:
+            flash("Please sign in first.")
+            return redirect(url_for("signin"))
+        
+        user = User.query.get(session["user_id"])
+        if not user.is_admin:
+            flash("You are not authorised to access this page.")
+            return redirect(url_for("index"))
+        return func(*args, **kwargs)
+    return inner
+
+
+# ---------- user routes
 @app.route("/home")
 @auth_required
 def home():    
@@ -126,3 +142,31 @@ def profile():
     user = User.query.get(session["user_id"])
     return render_template("profile.html", user = user)
 
+
+
+# ------------ Admin pages
+
+@app.route("/admin")
+@admin_required
+def admin():
+    return render_template("admin.html")
+
+@app.route("/category/add")
+@admin_required
+def add_category():
+    return "Add Category"
+
+@app.route("/category/<int:id>/")
+@admin_required
+def show_category(id):
+    return "Show Category"
+
+@app.route("/category/<int:id>/edit")
+@admin_required
+def edit_category(id):
+    return "Edit Category"
+
+@app.route("/category/<int:id>/delete")
+@admin_required
+def delete_category(id):
+    return "Delete Category"

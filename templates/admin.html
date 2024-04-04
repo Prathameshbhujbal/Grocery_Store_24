@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+Admin Dashboard
+{% endblock %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+<a href="{{url_for('add_category')}}" class="btn btn-success">
+    <i class="fas fa-plus"></i>
+    Add Category
+</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>Category ID</td>
+            <td>Category Name</td>
+            <td>Actions</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.id }}</td>
+            <td>{{ category.name }}</td>
+            <td>
+                <a href="{{url_for('show_category', id = category.id)}}">
+                    <i class="fas fa-search"></i>
+                    Show
+                </a>
+                <a href="{{url_for('show_category', id = category.id)}}">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </a>
+                <a href="{{url_for('show_category', id = category.id)}}">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
