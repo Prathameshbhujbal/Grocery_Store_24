@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+Edit Category
+{% endblock %}
+
+{% block content %}
+<h1>Edit Category</h1>
+<form action="" method="post" class="form">
+    <div>
+        <label for="name" class="form-label">Enter category name</label>
+        <input type="text" name="name" id="name" class="form-control" value="{{category.name}}" required>
+    </div>
+    <button type="submit" class="btn btn-success">
+        <i class="fas fa-edit"></i>
+        Update
+    </button>
+
+</form>
+{% endblock %}
