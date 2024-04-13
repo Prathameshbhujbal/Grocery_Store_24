@@ -3,7 +3,7 @@ from app import app
 from models import db, User, Category, Product, Cart, Transaction, Order
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-
+from datetime import datetime
 
 @app.route("/")
 def signin():
@@ -105,7 +105,7 @@ def admin_required(func):
 def home():
     user = User.query.get(session["user_id"])
     if user.is_admin == True:
-        return render_template("admin.html")
+        return redirect(url_for("admin"))
     return render_template("index.html")
     
 
@@ -169,18 +169,28 @@ def add_category_post():
         flash("Please fill out all the fields.")
         return redirect(url_for("add_category"))
     
+    new_category = Category.query.filter_by(name = name).first()
+    if new_category:
+        flash("Category already exists.")
+        return redirect(url_for("home"))
     category = Category(name=name)
     db.session.add(category)
     db.session.commit()
 
-    flash("Category Added Succesfully.")
+    flash("Category Added Successfully.")
     return redirect(url_for("admin"))
 
 
 @app.route("/category/<int:id>/")
 @admin_required
 def show_category(id):
-    return "Show Category"
+    category = Category.query.get(id)
+    if not category:
+        flash("Category does not exists.")
+        return redirect(url_for("admin"))
+    return render_template("category/show.html", category = category)
+
+
 
 @app.route("/category/<int:id>/edit")
 @admin_required
@@ -206,9 +216,13 @@ def edit_category_post(id):
         flash("Category does not exist.")
         return redirect(url_for("admin"))
     
+    # if category:
+    #     flash("Category already exists.")
+    #     return redirect(url_for("edit_category"))
+    
     category.name = name
     db.session.commit()
-    flash("Category edited succesfully.")
+    flash("Category edited successfully.")
     return redirect(url_for("admin"))
 
 @app.route("/category/<int:id>/delete")
@@ -231,5 +245,65 @@ def delete_category_post(id):
     db.session.delete(category)
     db.session.commit()
 
-    flash("Category deleted succesfully.")
+    flash("Category deleted successfully.")
+    return redirect(url_for("admin"))
+
+@app.route("/product/add/<int:category_id>")
+@admin_required
+def add_product(category_id):
+    category = Category.query.get(category_id)
+    categories = Category.query.all()
+    if not category:
+        flash("Category does not exist.")
+        return redirect(url_for("admin"))
+    return render_template("product/add.html", category=category, categories=categories)
+
+@app.route("/product/add/", methods = ["POST"])
+@admin_required
+def add_product_post():
+    name = request.form.get("name")
+    price = request.form.get("price")
+    category_id = request.form.get("category_id")
+    quantity = request.form.get("quantity")
+    man_date = request.form.get("man_date")
+
+    category = Category.query.get(category_id)
+    if not category:
+        flash("This category does not exist")
+        return redirect(url_for(admin))
+    
+    if not name or not price or not quantity or not man_date:
+        flash("Please fill out all the fields.")
+        return redirect(url_for("add_product", category_id = category_id))
+    
+    try:
+        price = float(price)
+        quantity = int(quantity)
+        man_date = datetime.strptime(man_date, "%Y-%m-%d")
+    except ValueError:
+        flash("Invalid value for quantity or price.")
+        return redirect(url_for("add_product", category_id = category_id))
+    
+
+    if price <= float(0):
+        flash("Price cannot less than or equal to zero!")
+        return redirect(url_for("add_product", category_id = category_id))
+    
+    if quantity < 0:
+        flash("Price cannot less than zero!")
+        return redirect(url_for("add_product", category_id = category_id))
+    
+    if man_date > datetime.now():
+        flash("Invalid manufacturing Date")
+        return redirect(url_for("add_product", category_id = category_id))
+
+    product = Product(name = name,
+                      price = price,
+                      category_id = category_id,
+                      quantity = quantity,
+                      man_date = man_date)
+    
+    db.session.add(product)
+    db.session.commit()
+    flash("Product added successfully :)")
     return redirect(url_for("admin"))

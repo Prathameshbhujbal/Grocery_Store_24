@@ -22,15 +22,8 @@
 
 <body>
     {% include 'navbar.html' with context %}
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="alert alert-danger" role="alert">
-        {% for message in messages %}
-        <h5>{{ message }}</h5>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
+    {% include 'messages.html' with context %}
+
 
 
     <div class="container">
